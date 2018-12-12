@@ -1,2 +1,2 @@
-# forgameprogrammer.github.io
-HearthStone Hakkar Calculations
+# HearthStone Hakkar Turn & Damage Calculations
+
