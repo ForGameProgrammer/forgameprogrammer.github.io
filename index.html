@@ -5,48 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="HakkarStylesheet.css">
-    <title>Hakkar Counter</title>
-    <script src="./hakkarcalc.js"></script>
-    <script>
-        function btnClick()
-        {
-            var health = parseInt(document.getElementById('health').value);
-            var armor = parseInt(document.getElementById('armor').value);
-            var blood = parseInt(document.getElementById('blood').value);
-            var fatigue = parseInt(document.getElementById('fatigue').value);
-            var result = document.getElementById('result');
-            var calculation = Calculate(health, armor, blood, fatigue);
+    <title>Hakkar Calculator</title>
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
-            result.innerHTML = "Turn Count : " + calculation[ "turnCount" ] + "<br>" +
-                "Blood Count : " + calculation[ "bloodCount" ] + "<br>" +
-                "Fatigue Damage : " + calculation[ "fatigueDamage" ] + "<br>" +
-                "Blood Damage : " + calculation[ "bloodDamage" ] + "<br>" +
-                "Total Animation Time : " + calculation[ "totalAnimationTime" ] + " seconds<br>" +
-                "Health Left : " + calculation[ "healthLeft" ] + "<br>";
-        }
-    </script>
+    <script src="./hakkarcalc.js"></script>
+
 </head>
 
 <body>
-    <header class="header"> <h2>Hakkar Counter</h2> </header>
+    <header class="header">
+        <h2>Hakkar Calculator</h2>
+    </header>
     <div class="container1">
-        <input type="text" id="health" placeholder="Health">
-        <br>
-        <br>
-        <input type="text" id="armor" placeholder="Armor">
-        <br>
-        <br>
-        <input type="text" id="blood" placeholder="Blood In Deck">
-        <br>
-        <br>
-        <input type="text" id="fatigue" placeholder="Fatigue">
-        <br>
-        <br>
-        <button id="calculate" onclick="btnClick();">Calculate</button>
-        <br>
-        <br>
-        <p id="result"></p>
+
+        <div><input type="text" id="health" placeholder="Health" title="Opponent's health."></div>
+        <div><input type="text" id="armor" placeholder="Armor" title="Opponent's armor."></div>
+        <div><input type="text" id="blood" placeholder="Corrupted Bloods In Deck" title="How many 'Corrupted Blood' cards in opponent's deck?"></div>
+        <div><input type="text" id="fatigue" placeholder="Fatigue" title="How many fatigue damage your opponent will take this turn?"></div>
+        <div><button id="calculate">Calculate</button></div>
+        <div>
+            <p id="result"></p>
+        </div>
     </div>
+
+    <div class="container1">
+        <div id="accordion">
+        </div>
+    </div>
+    <script>
+        $(document).ready(function ()
+        {
+
+            $(function ()
+            {
+                $("#accordion").accordion();
+                $(document).tooltip();
+            });
+
+            $("#calculate").click(function ()
+            {
+                var health = parseInt($("#health").val()) || 0;
+                var armor = parseInt($("#armor").val()) || 0;
+                var blood = parseInt($("#blood").val()) || 0;
+                var fatigue = parseInt($("#fatigue").val()) || 0;
+                var toAdd = "";
+                var calculation = Calculate(health, armor, blood, fatigue);
+                if (calculation["totalAnimationTime"] > 3600)
+                {
+                    toAdd += "How long can this go on...";
+                }
+
+                $("#result").html("Turn Count : " + calculation["turnCount"] + "<br>" +
+                    "Blood Count : " + calculation["bloodCount"] + "<br>" +
+                    "Fatigue Damage : " + calculation["fatigueDamage"] + "<br>" +
+                    "Corrupted Blood Damage : " + calculation["bloodDamage"] + "<br>" +
+                    "Total Animation Time : " + calculation["totalAnimationTime"] + " seconds<br>" +
+                    "Health Left : " + calculation["healthLeft"] + "<br>");
+
+                var turnCalculations = calculation["calculationPerTurn"];
+                $("#accordion").empty();
+                Object.keys(turnCalculations).forEach(turn =>
+                {
+                    var turnBloodDamage = turnCalculations[turn].bloodDamage;
+                    var turnFatigueDamage = turnCalculations[turn].fatigueDamage;
+                    var turnTotalDamage = turnBloodDamage + turnFatigueDamage;
+                    var turnHealth = turnCalculations[turn].health;
+                    var turnAnimationTime = turnCalculations[turn].animationTime;
+                    var li1 = $("<li></li>").text("Corrupted Blood Damage : " + turnBloodDamage);
+                    var li2 = $("<li></li>").text("Fatigue Damage : " + turnFatigueDamage);
+                    var li3 = $("<li></li>").text("Total Damage : " + turnTotalDamage);
+                    var li4 = $("<li></li>").text("Health Left : " + turnHealth);
+                    var li5 = $("<li></li>").text("Animation Time : " + turnAnimationTime);
+                    var ul = $("<ul></ul>").append(li1, li2, li3, li4, li5);
+                    var p = $("<p></p>").append(ul);
+                    var div = $("<div></div>").append(p);
+                    var h3 = $("<h3></h3>").text("Turn " + turn);
+                    $("#accordion").append(h3);
+                    $("#accordion").append(div);
+
+                });
+                $("#accordion").accordion("refresh");
+            });
+        });
+
+
+
+    </script>
 </body>
 
 </html>
